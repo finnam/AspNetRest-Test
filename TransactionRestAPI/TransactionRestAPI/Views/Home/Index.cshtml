@@ -6,9 +6,11 @@
 <div class="row">
     <div class="col-md-4">
         <h2>Getting started</h2>
-        <p>ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
-        a broad range of clients, including browsers and mobile devices. ASP.NET Web API
-        is an ideal platform for building RESTful applications on the .NET Framework.</p>
+        <p>
+            ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
+            a broad range of clients, including browsers and mobile devices. ASP.NET Web API
+            is an ideal platform for building RESTful applications on the .NET Framework.
+        </p>
         <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301870">Learn more &raquo;</a></p>
     </div>
     <div class="col-md-4">
@@ -22,3 +24,79 @@
         <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301872">Learn more &raquo;</a></p>
     </div>
 </div>
+
+    <!-- Transaction Stuff -->
+    <div>
+        <h1>All Transactions</h1>
+        <ul id="transactions" />
+    </div>
+    <div>
+        <h1>Search by ID</h1>
+        <input type="text" id="tranId" size="5" />
+        <input type="button" value="Search" onclick="find();" />
+        <p id="transaction" />
+    </div>
+    <div>
+        <h1>Create Transaction</h1>
+        <input type="button" value="Create" onclick="create();" />
+        <p id="create" />
+    </div>
+
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script>
+        var uri = 'http://localhost:26059/api/transaction';
+
+    $(document).ready(function () {
+      // Send an AJAX request
+      $.getJSON(uri)
+          .done(function (data) {
+            // On success, 'data' contains a list of products.
+            $.each(data, function (key, item) {
+              // Add a list item for the product.
+                $('<li>', { text: formatItem(item) }).appendTo($('#transactions'));
+            });
+          });
+    });
+
+    function formatItem(item) {
+        return item.TransactionId + '\t' + item.Description + '\t' + item.TransactionAmount + ' ' + item.CurrencyCode
+    }
+
+    function find() {
+      var id = $('#tranId').val();
+      $.getJSON(uri + '/' + id)
+          .done(function (data) {
+              $('#transaction').text(formatItem(data));
+          })
+          .fail(function (jqXHR, textStatus, err) {
+              $('#transaction').text('Error: ' + err);
+          });
+    }
+
+    function create() {
+        var trans = new Object();
+        trans.TransactionId = 0
+            trans.TransactionId= 0;
+           trans.TransactionDate= 0;
+            trans.Description= 'A New Transaction';
+            trans.TransactionAmount= 12.34;
+            trans.CreatedDate= 0;       
+            trans.ModifiedDate= 0;
+            trans.CurrencyCode= 'GBP';
+            trans.Merchant = 'MoneyBox';
+
+            $.ajax({
+                url: uri,
+                type: 'POST',
+                dataType: 'json',
+                data: trans,
+                success: function (data) {
+                    $('#create').text(formatItem(data))
+                },
+                error: function (jqXHR, textStatus, err) {
+                    $('#create').text('Error: ' + err);
+                }
+            });
+    }
+    </script>
+

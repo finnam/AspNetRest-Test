@@ -26,7 +26,7 @@ namespace TransactionRestAPI.Models
 
         public IList<ITransaction> Transactions()
         {
-            return _transactions.Select(t => t.Value).ToList();
+            return _transactions.Select(t => t.Value).ToList().AsReadOnly();
         }
 
         public ITransaction Get(long id)

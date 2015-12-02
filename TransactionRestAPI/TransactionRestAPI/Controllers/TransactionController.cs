@@ -13,28 +13,49 @@ namespace TransactionRestAPI.Controllers
         // GET: api/Transaction
         public IEnumerable<Transaction> Get()
         {
-            return new Transaction[] { new Transaction(), new Transaction() };
+            TransactionFactory tf= TransactionFactory.Instance();
+
+            return tf.Transactions().Select(t=>t as Transaction);
         }
 
         // GET: api/Transaction/5
-        public Transaction Get(int id)
+        public IHttpActionResult Get(int id)
         {
-            return null;
+            TransactionFactory tf = TransactionFactory.Instance();
+
+            Transaction t = tf.Get(id) as Transaction;
+            if ( t == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(t);
+            }
         }
 
         // POST: api/Transaction
-        public void Post([FromBody]Transaction value)
+        public Transaction Post([FromBody]Transaction value)
         {
+            TransactionFactory tf = TransactionFactory.Instance();
+
+            return tf.Create(value) as Transaction;
         }
 
         // PUT: api/Transaction/5
-        public void Put(int id, [FromBody]Transaction value)
+        public Transaction Put([FromBody]Transaction value)
         {
+            TransactionFactory tf = TransactionFactory.Instance();
+
+            return tf.Update(value) as Transaction;
         }
 
         // DELETE: api/Transaction/5
         public void Delete(int id)
         {
+            TransactionFactory tf = TransactionFactory.Instance();
+
+            tf.Delete(id);
         }
     }
 }
