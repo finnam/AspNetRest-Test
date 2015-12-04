@@ -1,9 +1,9 @@
 ﻿<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    <h1>TRANSACTION API TEST PAGE</h1>
+    @*<p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
+    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>*@
 </div>
-<div class="row">
+@*<div class="row">
     <div class="col-md-4">
         <h2>Getting started</h2>
         <p>
@@ -23,80 +23,123 @@
         <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
         <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301872">Learn more &raquo;</a></p>
     </div>
-</div>
-
+</div>*@
     <!-- Transaction Stuff -->
     <div>
-        <h1>All Transactions</h1>
+        <h2>All Transactions</h2>
+        <input type="button" value="Refresh" onclick="get();" />
         <ul id="transactions" />
     </div>
     <div>
-        <h1>Search by ID</h1>
+        <h2>Search by ID</h2>
         <input type="text" id="tranId" size="5" />
         <input type="button" value="Search" onclick="find();" />
         <p id="transaction" />
     </div>
     <div>
-        <h1>Create Transaction</h1>
+        <h2>Create Transaction</h2>
+        <input type="text" id="datepicker"/>
+        <input type="text" id="tranDesc" size="35" />
+        <input type="number" id="tranAmtn" min="0.01" step="0.01" max="2500" value="0">
+        <select id="ccyCombo">
+            <option value='GBP' title='GBP'>GBP</option>
+            <option value='JPY' title='JPY'>JPY</option>
+            <option value='USD' title='USD'>USD</option>
+        </select>
+        <input type="text" id="tranMerc" size="20" />
         <input type="button" value="Create" onclick="create();" />
         <p id="create" />
     </div>
+    <div>
+        <h2>Delete Transaction</h2>
+        <input type="text" id="tranDelId" size="5" />
+        <input type="button" value="Delete" onclick="delete_tran();" />
+        <p id="delete_tran" />
+    </div>
 
-    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
-    <script>
-        var uri = 'http://localhost:26059/api/transaction';
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/jquery-ui-1.11.4.js"></script>
+<script>
+    var uri = 'http://localhost:26059/api/transaction';
+    $("#datepicker").datepicker();
 
-    $(document).ready(function () {
-      // Send an AJAX request
-      $.getJSON(uri)
-          .done(function (data) {
-            // On success, 'data' contains a list of products.
-            $.each(data, function (key, item) {
-              // Add a list item for the product.
-                $('<li>', { text: formatItem(item) }).appendTo($('#transactions'));
-            });
-          });
+    $(document).ready(function () {   
+        // Send an AJAX request
+        get();
     });
 
+
+
+    function get() {
+        $('#transactions').empty();
+        $.getJSON(uri)
+            .done(function (data) {
+                // On success, 'data' contains a list of products.
+                $.each(data, function (key, item) {
+                    // Add a list item for the product.
+                    $('<li>', { text: formatItem(item) }).appendTo($('#transactions'));
+                });
+            });
+    }
+
     function formatItem(item) {
-        return item.TransactionId + '\t' + item.Description + '\t' + item.TransactionAmount + ' ' + item.CurrencyCode
+        return item.TransactionId + '\t' +
+                item.TransactionDate + '\t' +
+                item.Description + '\t' + item.TransactionAmount + ' ' + item.CurrencyCode + '\t' + item.CreatedDate
     }
 
     function find() {
-      var id = $('#tranId').val();
-      $.getJSON(uri + '/' + id)
-          .done(function (data) {
-              $('#transaction').text(formatItem(data));
-          })
-          .fail(function (jqXHR, textStatus, err) {
-              $('#transaction').text('Error: ' + err);
-          });
+        var id = $('#tranId').val();
+        $.getJSON(uri + '/' + id)
+            .done(function (data) {
+                $('#transaction').text(formatItem(data));
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('#transaction').text('Error: ' + err);
+            });
     }
 
     function create() {
         var trans = new Object();
         trans.TransactionId = 0
-            trans.TransactionId= 0;
-           trans.TransactionDate= 0;
-            trans.Description= 'A New Transaction';
-            trans.TransactionAmount= 12.34;
-            trans.CreatedDate= 0;       
-            trans.ModifiedDate= 0;
-            trans.CurrencyCode= 'GBP';
-            trans.Merchant = 'MoneyBox';
+        trans.TransactionDate = $("#datepicker").val();
+        trans.Description = $('#tranDesc').val();
+        trans.TransactionAmount = $('#tranAmtn').val();
+        trans.CreatedDate = 0;
+        trans.ModifiedDate = 0;
+        trans.CurrencyCode = $('#ccyCombo').val();
+        trans.Merchant = $('#tranMerc').val();;
 
-            $.ajax({
-                url: uri,
-                type: 'POST',
-                dataType: 'json',
-                data: trans,
-                success: function (data) {
-                    $('#create').text(formatItem(data))
-                },
-                error: function (jqXHR, textStatus, err) {
-                    $('#create').text('Error: ' + err);
-                }
-            });
+        $.ajax({
+            url: uri,
+            type: 'POST',
+            dataType: 'json',
+            data: trans,
+            success: function (data) {
+                $('#create').text(formatItem(data))
+            },
+            error: function (jqXHR, textStatus, err) {
+                $('#create').text('Error: ' + err);
+            }
+        });
     }
-    </script>
+
+    function delete_tran() {
+        var id = $('#tranDelId').val();
+
+        $.ajax({
+            url: uri + '/' + id,
+            type: 'DELETE',
+            contentType: "application/json",
+            success: function (data) {
+                $('#delete_tran').text(formatItem(data))
+            },
+            error: function (jqXHR, textStatus, err) {
+                $('#delete_tran').text('Error: ' + err);
+            }
+        });
+    }
+</script>
+
+
 

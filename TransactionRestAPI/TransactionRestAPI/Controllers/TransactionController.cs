@@ -51,11 +51,19 @@ namespace TransactionRestAPI.Controllers
         }
 
         // DELETE: api/Transaction/5
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
             TransactionFactory tf = TransactionFactory.Instance();
 
-            tf.Delete(id);
+            ITransaction t = tf.Delete(id);
+            if (t == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(t as Transaction);
+            }
         }
     }
 }

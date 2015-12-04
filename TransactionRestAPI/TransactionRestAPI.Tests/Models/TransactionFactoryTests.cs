@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TransactionRestAPI.Models;
@@ -32,9 +33,8 @@ namespace TransactionRestAPI.Tests.Models
         static DateTime _tdate = DateTime.Now;
 
         [TestMethod]
-        public void TransactionFactoryCreate()
+        public void TransactionFactoryCreateTest()
         {
-
             TransactionFactory tf = TransactionFactory.Instance();
             Transaction input = new Transaction();
             input.CurrencyCode = _currency;
@@ -47,7 +47,8 @@ namespace TransactionRestAPI.Tests.Models
 
             Assert.IsNotNull(output);
             Assert.AreEqual(1, output.TransactionId);
-            Assert.IsTrue(output.CreatedDate > _tdate && output.CreatedDate < DateTime.Now);
+            Assert.IsTrue(output.CreatedDate >= _tdate && output.CreatedDate <= DateTime.Now,
+                String.Format("CreationDateTest {0} >= {1} <= {2}", output.ModifiedDate, _tdate, DateTime.Now));
             Assert.AreEqual(output.CreatedDate, output.ModifiedDate);
             Assert.AreEqual(_currency, output.CurrencyCode);
             Assert.AreEqual(_merchant, output.Merchant);
@@ -56,7 +57,7 @@ namespace TransactionRestAPI.Tests.Models
         }
 
         [TestMethod]
-        public void TransactionFactoryGet()
+        public void TransactionFactoryGetTest()
         {
             TransactionFactory tf = TransactionFactory.Instance();
             long input = 1;
@@ -74,7 +75,7 @@ namespace TransactionRestAPI.Tests.Models
         }
 
         [TestMethod]
-        public void TransactionFactoryUpdate()
+        public void TransactionFactoryUpdateTest()
         {
             String  currency = "USD";
             String  merchant = "IG Group";
@@ -82,20 +83,23 @@ namespace TransactionRestAPI.Tests.Models
             Decimal amount = 56.12M;
             DateTime tdate = DateTime.Now;
 
+            TransactionFactory tf = TransactionFactory.Instance();
+            ITransaction output = tf.Get (1);
+
             Transaction input = new Transaction();
-            input.TransactionId = 1;
+            input.TransactionId = output.TransactionId;
             input.CurrencyCode = currency;
             input.Description = desc;
             input.Merchant = merchant;
             input.TransactionAmount = amount;
+            input.TransactionDate = output.TransactionDate;
 
-            TransactionFactory tf = TransactionFactory.Instance();
-            ITransaction output = tf.Update(input);
+            output = tf.Update(input);
 
             Assert.IsNotNull(output);
-            Assert.AreEqual(1, output.TransactionId);
-            Assert.IsTrue(output.ModifiedDate > tdate && output.CreatedDate < DateTime.Now);
-            Assert.IsTrue(output.CreatedDate < output.ModifiedDate);
+            Assert.IsTrue(output.ModifiedDate >= tdate && output.ModifiedDate <= DateTime.Now, 
+                String.Format("CreationDateTest {0} >= {1} <= {2}", output.ModifiedDate, tdate, DateTime.Now));
+            Assert.IsTrue(output.CreatedDate <= output.ModifiedDate, String.Format("ModifiedDateTest {0} <= {1}", output.CreatedDate, output.ModifiedDate));
             Assert.AreEqual(currency, output.CurrencyCode);
             Assert.AreEqual(merchant, output.Merchant);
             Assert.AreEqual(desc, output.Description);
@@ -103,7 +107,7 @@ namespace TransactionRestAPI.Tests.Models
         }
 
         [TestMethod]
-        public void TransactionFactoryDelete()
+        public void TransactionFactoryDeleteTest()
         {
             TransactionFactory tf = TransactionFactory.Instance();
             long input = 1;
