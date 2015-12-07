@@ -27,6 +27,24 @@
     <!-- Transaction Stuff -->
     <div>
         <h2>All Transactions</h2>
+        <table id="trans">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Currency</th>
+                    <th>Merchant</th>
+                    <th>Created</th>
+                    <th>Modified</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+
         <input type="button" value="Refresh" onclick="get();" />
         <ul id="transactions" />
     </div>
@@ -59,9 +77,11 @@
 
 <script src="~/Scripts/jquery-1.10.2.js"></script>
 <script src="~/Scripts/jquery-ui-1.11.4.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
 <script>
     var uri = 'http://localhost:26059/api/transaction';
-    $("#datepicker").datepicker();
+    $("#datepicker").datepicker({
+    });
 
     $(document).ready(function () {   
         // Send an AJAX request
@@ -72,13 +92,40 @@
 
     function get() {
         $('#transactions').empty();
+        $('#trans tbody').empty();
         $.getJSON(uri)
             .done(function (data) {
                 // On success, 'data' contains a list of products.
-                $.each(data, function (key, item) {
-                    // Add a list item for the product.
-                    $('<li>', { text: formatItem(item) }).appendTo($('#transactions'));
-                });
+                //$.each(data, function (key, item) {
+                //    // Add a list item for the product.
+                //    $('<li>', { text: formatItem(item) }).appendTo($('#transactions'));
+                    //
+                    //trHTML +=     "<tr>"
+                    //                 + "<td>" + item.TransactionId + "</td>"
+                    //                          + "<td>" + item.TransactionDate + "</td>"
+                    //                          +"<td>"+item.Description+"</td>"
+                    //                          +"<td>"+item.TransactionAmount+"</td>"
+                    //						  +"<td>"+item.CurrencyCode+"</td>"
+                    //						  +"<td>"+item.Merchant>+"</td>"
+                    //						  +"<td>"+item.CreatedDate>+"</td>"
+                    //                          +"<td>"+item.ModifiedDate>+"</td>"
+                    //               + "</tr>";
+                    //$('#trans tbody').append(trHTML);
+                //});
+                var html = $.map(data, function (item, i) {
+                    return "<tr><td>" +
+                        item.TransactionId + "</td><td>" +
+                        item.TransactionDate + "</td><td>" +
+                        item.Description + "</td><td>" +
+                        item.TransactionAmount + "</td><td>" +
+                        item.CurrencyCode + "</td><td>" +
+                        item.Merchant + "</td><td>" +
+                        item.CreatedDate + "</td><td>" +
+                        item.ModifiedDate
+                        + "</td></tr>";
+                }).join("");
+
+                $("#trans tbody").append(html);
             });
     }
 
